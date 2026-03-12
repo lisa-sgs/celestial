@@ -1,0 +1,96 @@
+# name: test/sql/celestial.test
+# description: test celestial extension
+# group: [sql]
+
+# Before we load the extension, this will fail
+statement error
+select spherical_angle(0, 0, 1, 0);
+----
+Catalog Error: Scalar Function with name spherical_angle does not exist!
+
+# Require statement will ensure this test is run with this extension loaded
+require celestial
+
+# Confirm the extension works
+query I
+select spherical_angle(0, 0, 1, 0);
+----
+1.0
+
+
+# Same point should return 0
+query I
+select spherical_angle(0, 0, 0, 0);
+----
+0.0
+
+# North pole at different longitudes is the same point
+query I
+select spherical_angle(0, pi()/2, pi(), pi()/2);
+----
+0.0
+
+# South pole at different longitudes is the same point
+query I
+select spherical_angle(1, -pi()/2, -1, -pi()/2);
+----
+0.0
+
+# Antipodal points on the equator (opposite sides of sphere)
+query I
+select degrees(spherical_angle(0, 0, pi(), 0));
+----
+180.0
+
+# North pole to south pole = pi radians
+query I
+select round(spherical_angle(0, pi()/2, 0, -pi()/2), 10);
+----
+3.1415926536
+
+# Quarter turn along equator = pi/2
+query I
+select degrees(spherical_angle(0, 0, pi()/2, 0));
+----
+90
+
+# Quarter turn along equator (other direction) = pi/2
+query I
+select degrees(spherical_angle(0, 0, -pi()/2, 0));
+----
+90
+
+# Symmetry: order of points should not matter
+query I
+select spherical_angle(0, 0, 1, 0) = spherical_angle(1, 0, 0, 0);
+----
+true
+
+# RA difference of 2*pi should be same as 0 (full circle)
+query I
+select round(spherical_angle(0, 0, 2*pi(), 0), 10);
+----
+0.0
+
+# NULL input should return NULL
+query I
+select spherical_angle(NULL, 0, 1, 0);
+----
+NULL
+
+# Crossing the antimeridian at the equator
+query I
+select spherical_angle(-pi()+0.1, 0, pi()-0.1, 0)
+----
+0.2
+
+# Crossing the antimeridian at 45deg latitude
+# Haversine:
+# cos(c) = sin(π/4)·sin(π/4) + cos(π/4)·cos(π/4)·cos(ra2 - ra1)
+#        = (1/2) + (1/2)·cos(0.2)
+#        = (1 + cos(0.2)) / 2
+#        = cos²(0.1) (half-angle identity)
+query I
+select spherical_angle(-pi()+0.1, pi()/4, pi()-0.1, pi()/4) - acos(pow(cos(0.1), 2))
+----
+0.0
