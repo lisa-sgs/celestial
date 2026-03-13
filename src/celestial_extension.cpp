@@ -32,16 +32,16 @@ static inline double haversine(double ra1, double dec1, double ra2, double dec2)
 }
 
 inline void SphericalAngleFunction(DataChunk &args, ExpressionState &state, Vector &result) {
-	auto &ra1_vec = args.data[0];
-	auto &dec1_vec = args.data[1];
-	auto &ra2_vec = args.data[2];
-	auto &dec2_vec = args.data[3];
-
 	UnifiedVectorFormat ra1_data, dec1_data, ra2_data, dec2_data;
-	ra1_vec.ToUnifiedFormat(args.size(), ra1_data);
-	dec1_vec.ToUnifiedFormat(args.size(), dec1_data);
-	ra2_vec.ToUnifiedFormat(args.size(), ra2_data);
-	dec2_vec.ToUnifiedFormat(args.size(), dec2_data);
+	args.data[0].ToUnifiedFormat(args.size(), ra1_data);
+	args.data[1].ToUnifiedFormat(args.size(), dec1_data);
+	args.data[2].ToUnifiedFormat(args.size(), ra2_data);
+	args.data[3].ToUnifiedFormat(args.size(), dec2_data);
+
+	const auto ra1_ptr = reinterpret_cast<const double *>(ra1_data.data);
+	const auto dec1_ptr = reinterpret_cast<const double *>(dec1_data.data);
+	const auto ra2_ptr = reinterpret_cast<const double *>(ra2_data.data);
+	const auto dec2_ptr = reinterpret_cast<const double *>(dec2_data.data);
 
 	auto result_data = FlatVector::GetData<double>(result);
 	auto &result_validity = FlatVector::Validity(result);
@@ -59,10 +59,10 @@ inline void SphericalAngleFunction(DataChunk &args, ExpressionState &state, Vect
 			continue;
 		}
 
-		double ra1 = ((double *)ra1_data.data)[ra1_idx];
-		double dec1 = ((double *)dec1_data.data)[dec1_idx];
-		double ra2 = ((double *)ra2_data.data)[ra2_idx];
-		double dec2 = ((double *)dec2_data.data)[dec2_idx];
+		double ra1 = ra1_ptr[ra1_idx];
+		double dec1 = dec1_ptr[dec1_idx];
+		double ra2 = ra2_ptr[ra2_idx];
+		double dec2 = dec2_ptr[dec2_idx];
 
 		result_data[i] = haversine(ra1, dec1, ra2, dec2);
 	}
