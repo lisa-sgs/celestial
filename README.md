@@ -1,7 +1,6 @@
 # Celestial
 
-This extension provides celestial coordinates functions.
-
+This extension provides astronomical coordinates functions.
 
 ## Building
 
@@ -27,7 +26,7 @@ The main binaries that will be built are:
 To run the extension code, simply start the shell with `./build/release/duckdb`.
 
 ```
-D select spherical_angle(0, 0, 1, 0) as radians_along_equator;
+D SELECT spherical_angle(0, 0, 1, 0) AS radians_along_equator;
 ┌───────────────────────┐
 │ radians_along_equator │
 │        double         │
