@@ -1,5 +1,8 @@
 #define DUCKDB_EXTENSION_MAIN
 
+#include <cmath>
+#include <algorithm>
+
 #include "duckdb.hpp"
 #include "duckdb/common/exception.hpp"
 #include "duckdb/function/scalar_function.hpp"
