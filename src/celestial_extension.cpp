@@ -23,6 +23,9 @@ static inline double haversine(double ra1, double dec1, double ra2, double dec2)
 	double a = sin_d_dec * sin_d_dec + std::cos(dec1) * std::cos(dec2) * sin_d_ra * sin_d_ra;
 
 	// Clamp `a` to [0, 1] to prevent NaN from minor floating-point inaccuracies
+	if (std::isnan(a)) {
+		return std::numeric_limits<double>::quiet_NaN();
+	}
 	a = std::clamp(a, 0.0, 1.0);
 
 	return 2.0 * std::atan2(std::sqrt(a), std::sqrt(1.0 - a));
